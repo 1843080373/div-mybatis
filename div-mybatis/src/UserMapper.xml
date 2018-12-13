@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mapper namespace="com.batis.mapper.UserMapper" >
+  <resultMap id="BaseResultMap" type="com.batis.po.User" >
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <select id="list" resultMap="BaseResultMap">
+    select 
+    user_id, user_name, password, phone
+    from user
+  </select>
+  
+   <select id="listCondition" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    user_id, user_name, password, phone
+    from user where user_name  LIKE CONCAT('%',#{userName,jdbcType=VARCHAR},'%')
+  </select>
+  
+  <delete id="delete" parameterType="java.lang.Integer" >
+    delete from user
+    where user_id = #{userId,jdbcType=INTEGER}
+  </delete>
+  <insert id="save" parameterType="com.batis.po.User" >
+    insert into user (user_name, password, 
+      phone)
+    values (#{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{phone,jdbcType=VARCHAR})
+  </insert>
+  
+  <update id="update" parameterType="com.batis.po.User" >
+    update user
+    set user_name = #{userName,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR}
+    where user_id = #{userId,jdbcType=INTEGER}
+  </update>
+</mapper>
