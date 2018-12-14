@@ -2,6 +2,7 @@ package com.batis.test;
 
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
@@ -58,9 +59,21 @@ public class DemoTest {
 		//int rows = userMapper.update(user);
 		//int rows = userMapper.delete(2);
 		//System.out.println(rows);
-		List<User> list=userMapper.list();
-		System.out.println(JSONObject.toJSON(list));
+		/*List<User> list=userMapper.list();
+		System.out.println(JSONObject.toJSON(list));*/
 		//List<User> list=userMapper.listCondition("22");
 		//System.out.println(JSONObject.toJSON(list));
+		List<User> list=userMapper.queryCondition(new HashMap<String, Object>(){
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			{
+				put("userName", "ÕÅÈý");
+				put("phone", "1807657569");
+			}
+		});
+		System.out.println(JSONObject.toJSON(list));
 	}
 }

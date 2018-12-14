@@ -18,7 +18,12 @@
     user_id, user_name, password, phone
     from user where user_name  LIKE CONCAT('%',#{userName,jdbcType=VARCHAR},'%')
   </select>
-  
+    <select id="queryCondition" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    user_id, user_name, password, phone
+    from user where user_name LIKE CONCAT('%',#{userName,jdbcType=VARCHAR},'%')
+    AND phone=#{phone,jdbcType=VARCHAR}
+  </select>
   <delete id="delete" parameterType="java.lang.Integer" >
     delete from user
     where user_id = #{userId,jdbcType=INTEGER}

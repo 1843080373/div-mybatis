@@ -59,7 +59,7 @@ public class MapperProxy<T> implements InvocationHandler {
 			System.out.println("method\t" + methodName);
 			System.out.println("arg\t"+arg1);
 			String parameterType=opeateTag.getParameterType();
-			if(parameterType!=null&&arg!=null&&!ReflectUtils.isBaseType(arg1)) {
+			if(parameterType!=null&&arg!=null&&!ReflectUtils.isBaseType(arg1)&&!(arg1 instanceof Map)) {
 				String argType=arg1.getClass().getName();
 				if (parameterType != null
 						&& !parameterType.equals(argType)) {
@@ -113,6 +113,7 @@ public class MapperProxy<T> implements InvocationHandler {
 		return list;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	private void buildParams(PreparedStatement ps, OpeateTag opeateTag,Object arg1) {
 		try {
 			if(arg1!=null) {
@@ -126,8 +127,13 @@ public class MapperProxy<T> implements InvocationHandler {
 					if(ReflectUtils.isBaseType(arg1)) {
 						ps.setObject(index, arg1);
 					}else {
-						Object fieldValue=ReflectUtils.invokeGet(arg1, fieldName);
-						ps.setObject(index, fieldValue);
+						if(arg1 instanceof Map) {
+							Map map=(Map) arg1;
+							ps.setObject(index, map.get(fieldName));
+						}else{
+							Object fieldValue=ReflectUtils.invokeGet(arg1, fieldName);
+							ps.setObject(index, fieldValue);
+						}
 					}
 				}
 			}
