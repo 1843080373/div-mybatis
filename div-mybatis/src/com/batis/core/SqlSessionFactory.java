@@ -1,5 +1,8 @@
 package com.batis.core;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -7,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,26 +19,100 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
+import com.batis.bean.Environment;
 import com.batis.bean.Mapper;
+import com.batis.bean.MybatisCfg;
+import com.batis.bean.MybatisDataSource;
 import com.batis.bean.OpeateTag;
 import com.batis.bean.Result;
 import com.batis.bean.ResultMap;
 import com.batis.bean.Sql;
+import com.batis.utils.StringUtils;
 public class SqlSessionFactory {
 
+	private static MybatisCfg mybatisCfg=new MybatisCfg();
+	
 	private static Map<String,Mapper> mapperMaps=null;
 
 	public SqlSessionFactory(Map<String, Mapper> mapperMaps) {
-		SqlSessionFactory.mapperMaps = mapperMaps;
+		SqlSessionFactory.mapperMaps = mybatisCfg.getMappers();
 	}
 
 	public SqlSession openSession() {
-		Connection connection=DBMananger.getConnection();
-		return new SqlSession(connection,SqlSessionFactory.mapperMaps);
+		Connection connection=DBMananger.getConnection(mybatisCfg);
+		return new SqlSession(connection,mybatisCfg.getMappers());
 	}
 
 	@SuppressWarnings("unchecked")
 	public static SqlSessionFactory build(InputStream inputStream) {
+		try {
+			
+			Properties properties=new Properties();
+			SAXReader reader = new SAXReader();
+			Document document = reader.read(inputStream);
+			Element root = document.getRootElement();
+			//properties
+			List<Element> propertiesElements = root.elements("properties");
+			if(!propertiesElements.isEmpty()) {
+				mybatisCfg.setProperties(propertiesElements.get(0).attributeValue("resource"));
+				properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(mybatisCfg.getProperties()));
+			}
+			//defaultEnv
+			List<Element> environmentsElements = root.elements("environments");
+			if(!environmentsElements.isEmpty()) {
+				mybatisCfg.setDefaultEnv(environmentsElements.get(0).attributeValue("default"));
+				//environments
+				Map<String,Environment> environments=new HashMap<String,Environment>();
+				List<Element> envIntemsElements = environmentsElements.get(0).elements("environment");
+				for (Element element : envIntemsElements) {
+					Environment env=new Environment();
+					env.setId(element.attributeValue("id"));
+					env.setTransactionManagerType(element.element("transactionManager").attributeValue("type"));
+					MybatisDataSource mybatisDataSource=new MybatisDataSource();
+					Element dataSourceElement = element.element("dataSource");
+					mybatisDataSource.setType(dataSourceElement.attributeValue("type"));
+					List<Element> dsElement = dataSourceElement.elements("property");
+					LinkedHashMap<String,String> dataSMap=new LinkedHashMap<>();
+					for (Element ele : dsElement) {
+						dataSMap.put(ele.attributeValue("name"), ele.attributeValue("value"));
+					}
+					mybatisDataSource.setUsername(properties.getProperty(StringUtils.get$StrValue(dataSMap.get("username"))));
+					mybatisDataSource.setPassword(properties.getProperty(StringUtils.get$StrValue(dataSMap.get("password"))));
+					mybatisDataSource.setDriver(properties.getProperty(StringUtils.get$StrValue(dataSMap.get("driver"))));
+					mybatisDataSource.setUrl(properties.getProperty(StringUtils.get$StrValue(dataSMap.get("url"))));
+					env.setMybatisDataSource(mybatisDataSource);
+					environments.put(env.getId(), env);
+				}
+				mybatisCfg.setEnvironments(environments);
+			}
+			//mappers
+			List<Element> mappersElements = root.element("mappers").elements("mapper");
+			if(!mappersElements.isEmpty()) {
+				Map<String,Mapper> mappers=new HashMap<>();
+				for (Element element : mappersElements) {
+					String resource = element.attributeValue("resource");
+					mappers.put(StringUtils.str2Package(resource), null);
+					buildMappers(mappers,new FileInputStream(new File("src/"+resource)));
+				}
+				mybatisCfg.setMappers(mappers);
+			}
+			return new SqlSessionFactory(mapperMaps);
+		} catch (DocumentException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				inputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static void buildMappers(Map<String,Mapper> mappers,InputStream inputStream) {
 		try {
 			SAXReader reader = new SAXReader();
 			Document document = reader.read(inputStream);
@@ -43,7 +121,6 @@ public class SqlSessionFactory {
 			Element root = document.getRootElement();
 			String  namespace= root.attributeValue("namespace");
 			mapper.setNamespace(namespace);
-			mapperMaps.put(namespace, mapper);
 			//resultMap
 			List<Element> resultMapChildElements = root.elements("resultMap");
 			if(!resultMapChildElements.isEmpty()) {
@@ -77,10 +154,17 @@ public class SqlSessionFactory {
 			buildOpreateData(root,"delete",opeateTagMaps);
 			buildOpreateData(root,"select",opeateTagMaps);
 			mapper.setOpeateTagMaps(opeateTagMaps);
-		} catch (DocumentException e) {
+			mappers.put(namespace, mapper);
+			mybatisCfg.setMappers(mapperMaps);
+		} catch (Exception e) {
 			e.printStackTrace();
+		}finally {
+			try {
+				inputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-		return new SqlSessionFactory(mapperMaps);
 	}
 
 	@SuppressWarnings("unchecked")

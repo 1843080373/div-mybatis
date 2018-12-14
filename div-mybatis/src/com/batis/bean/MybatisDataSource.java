@@ -1,13 +1,16 @@
 package com.batis.bean;
 
 /**
- * 配置信息
+ * 数据库配置信息
  * 
  * @author 紫马
  *
  */
-public class Configuration {
-
+public class MybatisDataSource {
+	/**
+	 *数据源类型，分别是：POOLED,UNPOOLED,JNDI
+	 */
+	private String type;
 	/**
 	 * 驱动
 	 */
@@ -25,6 +28,14 @@ public class Configuration {
 	 */
 	private String password;
 	
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 
 	public String getDriver() {
 		return driver;
@@ -58,7 +69,7 @@ public class Configuration {
 		this.password = password;
 	}
 	
-	public Configuration(String driver, String url, String username, String password) {
+	public MybatisDataSource(String driver, String url, String username, String password) {
 		super();
 		this.driver = driver;
 		this.url = url;
@@ -66,7 +77,7 @@ public class Configuration {
 		this.password = password;
 	}
 
-	public Configuration() {
+	public MybatisDataSource() {
 		super();
 	}
 

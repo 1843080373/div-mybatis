@@ -1,13 +1,11 @@
 package com.batis.core;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Properties;
-
-import com.batis.bean.Configuration;
+import com.batis.bean.MybatisCfg;
+import com.batis.bean.MybatisDataSource;
 
 /**
  * 根据配置文件，管理连接对象
@@ -17,20 +15,11 @@ import com.batis.bean.Configuration;
  */
 public class DBMananger {
 
-	private static Configuration conf = null;
-	static {
-		Properties pro = new Properties();
+	private static MybatisDataSource conf = null;
+	
+	public static Connection getConnection(MybatisCfg mybatisCfg) {
 		try {
-			pro.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("jdbc.properties"));
-			conf = new Configuration(pro.getProperty("orm.jdbc.driver"), pro.getProperty("orm.jdbc.url"),
-					pro.getProperty("orm.jdbc.username"), pro.getProperty("orm.jdbc.password"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static Connection getConnection() {
-		try {
+			conf=mybatisCfg.getEnvironments().get(mybatisCfg.getDefaultEnv()).getMybatisDataSource();
 			Class.forName(conf.getDriver());
 			return DriverManager.getConnection(conf.getUrl(), conf.getUsername(), conf.getPassword());
 		} catch (ClassNotFoundException e) {
@@ -53,7 +42,7 @@ public class DBMananger {
 		}
 	}
 
-	public static Configuration getConfiguration() {
+	public static MybatisDataSource getConfiguration() {
 		return conf;
 	}
 }

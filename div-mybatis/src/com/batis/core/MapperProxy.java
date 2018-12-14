@@ -33,48 +33,56 @@ public class MapperProxy<T> implements InvocationHandler {
 	@Override
 	public Object invoke(Object obj, Method m, Object[] arg) throws Throwable {
 		Object o = null;
-		Connection connection = sqlSession.getConnection();
-		Map<String, Mapper> mapperMap = sqlSession.getMapperMaps();
-		String namespace = obj.getClass().getInterfaces()[0].getName();
-		Mapper mapper = mapperMap.get(namespace);
-		if (mapper == null) {
-			throw new RuntimeException("找不到mapper");
-		}
-		String methodName = m.getName();
-		OpeateTag opeateTag = mapper.getOpeateTagMaps().get(methodName);
-		if (opeateTag == null) {
-			throw new RuntimeException("找不到opeateTag");
-		}
-		Object arg1 = null;
-		if (arg != null && arg.length > 1) {
-			throw new RuntimeException("arg参数太长");
-		}
-		if(arg!=null) {
-			arg1=arg[0];
-		}
-		System.out.println("namespace  " + namespace);
-		System.out.println("methodName  " + methodName);
-		System.out.println("arg  "+arg1);
-		String parameterType=opeateTag.getParameterType();
-		if(parameterType!=null&&arg!=null&&!ReflectUtils.isBaseType(arg1)) {
-			if (parameterType != null
-					&& !parameterType.equals(arg1.getClass().getPackage().getName() + "." + arg1.getClass().getName())) {
-				throw new RuntimeException("parameterType不匹配");
+		PreparedStatement ps=null;
+		Connection connection =null;
+		try {
+			connection = sqlSession.getConnection();
+			Map<String, Mapper> mapperMap = sqlSession.getMapperMaps();
+			String namespace = obj.getClass().getInterfaces()[0].getName();
+			Mapper mapper = mapperMap.get(namespace);
+			if (mapper == null) {
+				throw new RuntimeException("找不到mapper");
 			}
-		}
-		PreparedStatement ps = connection.prepareStatement(opeateTag.getSql().getPsSql());
-		buildParams(ps, opeateTag,arg1);
-		System.out.println("sql  "+opeateTag.getSql().getPsSql());
-		if (isDML(opeateTag.getOpeate())) {
-			o = ps.executeUpdate();
-		} else {
-			if(!mapper.getResultMaps().keySet().contains(opeateTag.getResultMap())) {
-				throw new RuntimeException("找不到resultMap");
+			String methodName = m.getName();
+			OpeateTag opeateTag = mapper.getOpeateTagMaps().get(methodName);
+			if (opeateTag == null) {
+				throw new RuntimeException("找不到opeateTag");
 			}
-			ResultSet rs = ps.executeQuery();
-			o=buildResultSet(mapper.getResultMaps().get(opeateTag.getResultMap()),opeateTag, rs);
+			Object arg1 = null;
+			if (arg != null && arg.length > 1) {
+				throw new RuntimeException("arg参数太长");
+			}
+			if(arg!=null) {
+				arg1=arg[0];
+			}
+			System.out.println("mapper\t" + namespace);
+			System.out.println("method\t" + methodName);
+			System.out.println("arg\t"+arg1);
+			String parameterType=opeateTag.getParameterType();
+			if(parameterType!=null&&arg!=null&&!ReflectUtils.isBaseType(arg1)) {
+				String argType=arg1.getClass().getName();
+				if (parameterType != null
+						&& !parameterType.equals(argType)) {
+					throw new RuntimeException("parameterType不匹配");
+				}
+			}
+			ps = connection.prepareStatement(opeateTag.getSql().getPsSql());
+			buildParams(ps, opeateTag,arg1);
+			System.out.println("sql\t"+opeateTag.getSql().getPsSql());
+			if (isDML(opeateTag.getOpeate())) {
+				o = ps.executeUpdate();
+			} else {
+				if(!mapper.getResultMaps().keySet().contains(opeateTag.getResultMap())) {
+					throw new RuntimeException("找不到resultMap");
+				}
+				ResultSet rs = ps.executeQuery();
+				o=buildResultSet(mapper.getResultMaps().get(opeateTag.getResultMap()),opeateTag, rs);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+		   DBMananger.closeConnection(connection, ps);
 		}
-		ps.close();
 		return o;
 	}
 	

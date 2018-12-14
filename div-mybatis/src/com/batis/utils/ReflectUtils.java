@@ -40,7 +40,8 @@ public class ReflectUtils {
 				|| className.equals(java.lang.Byte.class) || className.equals(java.lang.Long.class)
 				|| className.equals(java.lang.Double.class) || className.equals(java.lang.Float.class)
 				|| className.equals(java.lang.Character.class) || className.equals(java.lang.Short.class)
-				|| className.equals(java.lang.Boolean.class)) {
+				|| className.equals(java.lang.Boolean.class)
+				|| className.equals(java.util.Date.class)) {
 			return true;
 		}
 		return false;

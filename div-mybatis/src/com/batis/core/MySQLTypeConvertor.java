@@ -23,13 +23,9 @@ public class MySQLTypeConvertor implements TypeConvertor {
 			return "java.lang.Clob";
 		} else if ("Blob".equalsIgnoreCase(dbType)) {
 			return "java.lang.Blob";
-		} else if ("Date".equalsIgnoreCase(dbType)) {
-			return "java.utils.Date";
-		} else if ("datetime".equalsIgnoreCase(dbType)) {
-			return "java.utils.Timestamp";
-		} else if ("Timestamp".equalsIgnoreCase(dbType)) {
-			return "java.utils.Timestamp";
-		} else if ("bit".equalsIgnoreCase(dbType)) {
+		} else if ("timestamp".equalsIgnoreCase(dbType)) {
+			return "java.util.Date";
+		}else if ("bit".equalsIgnoreCase(dbType)) {
 			return "java.lang.Boolean";
 		}
 		return null;
@@ -50,12 +46,8 @@ public class MySQLTypeConvertor implements TypeConvertor {
 		} else if ("Blob".equalsIgnoreCase(dbType)) {
 			return "java.lang.Blob";
 		} else if ("Date".equalsIgnoreCase(dbType)) {
-			return "java.sql.Date";
-		} else if ("datetime".equalsIgnoreCase(dbType)) {
-			return "java.sql.Timestamp";
-		} else if ("Timestamp".equalsIgnoreCase(dbType)) {
-			return "java.sql.Timestamp";
-		} else if ("bit".equalsIgnoreCase(dbType)) {
+			return "java.util.Date";
+		}else if ("bit".equalsIgnoreCase(dbType)) {
 			return "java.sql.Boolean";
 		}
 		return null;
