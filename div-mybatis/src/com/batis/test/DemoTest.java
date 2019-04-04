@@ -35,12 +35,12 @@ public class DemoTest {
 		record.setVersion(0);
 		record.setCreateTime(new Date());
 		record.setUpdateTime(new Date());
-		//int rows=answerMapper.insert(record);
-		//int rows=answerMapper.deleteByPrimaryKey(98715);
-		//int rows=answerMapper.updateByPrimaryKey(record);
-		//System.out.println(rows);
-		//List<Answer> list=answerMapper.selectAll();
-		List<Answer> list=answerMapper.selectByPrimaryKey(2);
+		// int rows=answerMapper.insert(record);
+		// int rows=answerMapper.deleteByPrimaryKey(98715);
+		// int rows=answerMapper.updateByPrimaryKey(record);
+		// System.out.println(rows);
+		// List<Answer> list=answerMapper.selectAll();
+		List<Answer> list = answerMapper.selectByPrimaryKey(2);
 		System.out.println(JSONObject.toJSON(list));
 	}
 
@@ -55,25 +55,29 @@ public class DemoTest {
 		user.setUserName("张三");
 		user.setPassword("123456");
 		user.setPhone("1807657569");
-		//int rows = userMapper.save(user);
-		//int rows = userMapper.update(user);
-		//int rows = userMapper.delete(2);
-		//System.out.println(rows);
-		/*List<User> list=userMapper.list();
-		System.out.println(JSONObject.toJSON(list));*/
-		//List<User> list=userMapper.listCondition("22");
-		//System.out.println(JSONObject.toJSON(list));
-		List<User> list=userMapper.queryCondition(new HashMap<String, Object>(){
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			{
-				put("userName", "张三");
-				put("phone", "1807657569");
-			}
-		});
+		// int rows = userMapper.save(user);
+		// int rows = userMapper.update(user);
+		// int rows = userMapper.delete(2);
+		// System.out.println(rows);
+		/*
+		 * List<User> list=userMapper.list();
+		 * System.out.println(JSONObject.toJSON(list));
+		 */
+		// List<User> list=userMapper.listCondition("22");
+		// System.out.println(JSONObject.toJSON(list));
+		/*
+		 * List<User> list=userMapper.queryCondition3(new HashMap<String, Object>(){
+		 *//**
+			* 
+			*//*
+				 * private static final long serialVersionUID = 1L;
+				 * 
+				 * { put("userName", "张三"); put("phone", "1807657569"); } });
+				 */
+		/*
+		 * List<User> list = userMapper.listCondition2(new User(null, null, null, "张三"));
+		 */
+		List<User> list = userMapper.listCondition1("张三");
 		System.out.println(JSONObject.toJSON(list));
 	}
 }

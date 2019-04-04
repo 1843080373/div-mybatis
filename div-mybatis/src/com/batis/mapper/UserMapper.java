@@ -15,8 +15,10 @@ public interface UserMapper {
 	
 	public List<User> list();
 	
-	public List<User> listCondition(String name);
+	public List<User> listCondition1(String name);
 	
-	public List<User> queryCondition(Map<String,Object> param);
+	public List<User> listCondition2(User user);
+	
+	public List<User> queryCondition3(Map<String,Object> param);
 
 }

@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,8 @@ import com.batis.bean.Result;
 import com.batis.bean.ResultMap;
 import com.batis.bean.Sql;
 import com.batis.utils.ReflectUtils;
+import com.googlecode.aviator.AviatorEvaluator;
+import com.googlecode.aviator.Expression;
 
 public class MapperProxy<T> implements InvocationHandler {
 
@@ -129,7 +132,7 @@ public class MapperProxy<T> implements InvocationHandler {
 				buildDynamicSQL(sql, sqlContent);
 				if(opeateTag.getIfList()!=null&&opeateTag.getIfList().size()>0) {
 					for (If IfTag : opeateTag.getIfList()) {
-						boolean excuteTest=excuteTest(arg1,IfTag.getTest());
+						boolean excuteTest=excuteTest(arg1,IfTag.getTest(),opeateTag.getAlias());
 						if(excuteTest) {
 							buildDynamicSQL(sql, IfTag.getContext(),sql.getParamTypes(),sql.getPsSql());
 						}
@@ -164,18 +167,17 @@ public class MapperProxy<T> implements InvocationHandler {
 		return ps;
 	}
 
-	private boolean excuteTest(Object arg1, String test) {
-		System.out.println(test);
+	private boolean excuteTest(Object arg1, String test,String alias) {
 		if(ReflectUtils.isBaseType(arg1)) {
-			return true;
+			Expression compiledExp = AviatorEvaluator.compile(test);
+			Map<String, Object> env = new HashMap<String, Object>();
+			env.put(alias, arg1);
+			return (boolean) compiledExp.execute(env);
 		}else {
-			if(arg1 instanceof Map) {
-				Map<?, ?> map=(Map<?, ?>) arg1;
-			}else{
-				//Object fieldValue=ReflectUtils.invokeGet(arg1, "");
-			}
+			Map<String, Object> env = new HashMap<String, Object>();
+			env.put(alias, arg1);
+			return (boolean) AviatorEvaluator.execute(test, env);
 		}
-		return true;
 	}
 	private void buildDynamicSQL(Sql sql, String sqlContent) {
 		matcher(sql, sqlContent, null);

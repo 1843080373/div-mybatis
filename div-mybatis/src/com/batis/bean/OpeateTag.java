@@ -7,6 +7,7 @@ public class OpeateTag {
 	private String parameterType;
 	private String resultMap;
 	private String opeate;
+	private String alias;
 	private Sql sql;
 	private List<If> ifList;
 	public String getId() {
@@ -26,6 +27,13 @@ public class OpeateTag {
 	}
 	public void setResultMap(String resultMap) {
 		this.resultMap = resultMap;
+	}
+	
+	public String getAlias() {
+		return alias;
+	}
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 	public String getOpeate() {
 		return opeate;

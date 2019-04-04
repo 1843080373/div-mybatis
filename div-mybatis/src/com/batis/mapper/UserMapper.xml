@@ -1,51 +1,74 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<mapper namespace="com.batis.mapper.UserMapper" >
-  <resultMap id="BaseResultMap" type="com.batis.po.User" >
-    <result column="user_id" property="userId" jdbcType="INTEGER" />
-    <result column="user_name" property="userName" jdbcType="VARCHAR" />
-    <result column="password" property="password" jdbcType="VARCHAR" />
-    <result column="phone" property="phone" jdbcType="VARCHAR" />
-  </resultMap>
-  
-  <select id="list" resultMap="BaseResultMap">
-    select 
-    user_id, user_name, password, phone
-    from user
-  </select>
-  
-   <select id="listCondition" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
-    user_id, user_name, password, phone
-    from user where user_name  LIKE CONCAT('%',#{userName,jdbcType=VARCHAR},'%')
-  </select>
-    <select id="queryCondition" resultMap="BaseResultMap" parameterType="java.util.Map" >
-    select 
-    user_id, user_name, password, phone
-    from user
-    WHERE 1=1 
-	    <if test="userName neq null">
-	        AND user_name LIKE CONCAT('%',#{userName,jdbcType=VARCHAR},'%')
-	   </if>
-	   <if test="phone neq null">
-	        AND phone=#{phone,jdbcType=VARCHAR}
-	   </if>
-  </select>
-  <delete id="delete" parameterType="java.lang.Integer" >
-    delete from user
-    where user_id = #{userId,jdbcType=INTEGER}
-  </delete>
-  <insert id="save" parameterType="com.batis.po.User" >
-    insert into user (user_name, password, 
-      phone)
-    values (#{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
-      #{phone,jdbcType=VARCHAR})
-  </insert>
-  
-  <update id="update" parameterType="com.batis.po.User" >
-    update user
-    set user_name = #{userName,jdbcType=VARCHAR},
-      password = #{password,jdbcType=VARCHAR},
-      phone = #{phone,jdbcType=VARCHAR}
-    where user_id = #{userId,jdbcType=INTEGER}
-  </update>
+<mapper namespace="com.batis.mapper.UserMapper">
+	<resultMap id="BaseResultMap" type="com.batis.po.User">
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="user_name" property="userName"
+			jdbcType="VARCHAR" />
+		<result column="password" property="password"
+			jdbcType="VARCHAR" />
+		<result column="phone" property="phone" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="list" resultMap="BaseResultMap">
+		select
+		user_id, user_name, password, phone
+		from user
+	</select>
+
+	<select id="listCondition1" resultMap="BaseResultMap"
+		parameterType="java.lang.String" alias="param">
+		select
+		user_id, user_name, password, phone
+		from user 
+		WHERE 1=1
+		<if test="param != nil">
+			AND user_name LIKE CONCAT('%',#{param,jdbcType=VARCHAR},'%')
+		</if>
+	</select>
+	
+	<select id="listCondition2" resultMap="BaseResultMap"
+		parameterType="com.batis.po.User" alias="user">
+		select
+		user_id, user_name, password, phone
+		from user  
+		WHERE 1=1
+		<if test="user.userName != nil">
+			AND user_name LIKE CONCAT('%',#{userName,jdbcType=VARCHAR},'%')
+		</if>
+		<if test="user.phone != nil">
+			AND phone=#{phone,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<select id="queryCondition3" resultMap="BaseResultMap"
+		parameterType="java.util.Map" alias="param">
+		select
+		user_id, user_name, password, phone
+		from user
+		WHERE 1=1
+		<if test="param.userName != nil">
+			AND user_name LIKE CONCAT('%',#{userName,jdbcType=VARCHAR},'%')
+		</if>
+		<if test="param.phone != nil">
+			AND phone=#{phone,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from user
+		where user_id = #{userId,jdbcType=INTEGER}
+	</delete>
+	<insert id="save" parameterType="com.batis.po.User">
+		insert into user (user_name, password,
+		phone)
+		values (#{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+		#{phone,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="update" parameterType="com.batis.po.User">
+		update user
+		set user_name = #{userName,jdbcType=VARCHAR},
+		password = #{password,jdbcType=VARCHAR},
+		phone = #{phone,jdbcType=VARCHAR}
+		where user_id = #{userId,jdbcType=INTEGER}
+	</update>
 </mapper>

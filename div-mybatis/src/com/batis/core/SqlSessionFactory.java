@@ -178,6 +178,7 @@ public class SqlSessionFactory {
 				OpeateTag opeateTag=new OpeateTag();
 				opeateTag.setOpeate(child.getName());
 				opeateTag.setId(child.attributeValue("id"));
+				opeateTag.setAlias(child.attributeValue("alias"));
 				opeateTag.setParameterType(child.attributeValue("parameterType"));
 				opeateTag.setResultMap(child.attributeValue("resultMap"));
 				String sqlContent=child.getTextTrim();

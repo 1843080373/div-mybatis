@@ -6,6 +6,18 @@ public class User {
 	private String phone;
 	private String userName;
 
+	public User() {
+		super();
+	}
+
+	public User(String password, Integer userId, String phone, String userName) {
+		super();
+		this.password = password;
+		this.userId = userId;
+		this.phone = phone;
+		this.userName = userName;
+	}
+
 	public String getPassword() {
 		return password;
 	}

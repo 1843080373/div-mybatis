@@ -35,6 +35,9 @@ public class ReflectUtils {
 	 * @return
 	 */
 	public static boolean isBaseType(Object object) {
+		if(object==null) {
+			return true;
+		}
 		Class<? extends Object> className = object.getClass();
 		if (className.equals(java.lang.String.class) || className.equals(java.lang.Integer.class)
 				|| className.equals(java.lang.Byte.class) || className.equals(java.lang.Long.class)
