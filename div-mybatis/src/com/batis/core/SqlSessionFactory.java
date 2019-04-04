@@ -19,7 +19,9 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
+import com.alibaba.fastjson.JSONObject;
 import com.batis.bean.Environment;
+import com.batis.bean.If;
 import com.batis.bean.Mapper;
 import com.batis.bean.MybatisCfg;
 import com.batis.bean.MybatisDataSource;
@@ -95,6 +97,7 @@ public class SqlSessionFactory {
 					buildMappers(mappers,new FileInputStream(new File("src/"+resource)));
 				}
 				mybatisCfg.setMappers(mappers);
+				System.out.println("------->mappers="+JSONObject.toJSONString(mappers));
 			}
 			return new SqlSessionFactory(mapperMaps);
 		} catch (DocumentException e) {
@@ -180,23 +183,30 @@ public class SqlSessionFactory {
 				String sqlContent=child.getTextTrim();
 				Sql sql=new Sql();
 				sql.setSqlContent(sqlContent);
-				Pattern p = Pattern.compile("\\{[^\\}]*\\}");
-				Matcher m = p.matcher(sqlContent);
-				LinkedHashMap<String,String> paramTypes=new LinkedHashMap<>();
-				while (m.find()) {
-					String item=sqlContent.substring(m.start(), m.end());
-					String newItem=item.substring(1, item.length()-1);
-					String[] array=newItem.split(",");
-					String fieldNamee=array[0];
-					String jdbcType=array[1].substring("jdbcType=".length());
-					paramTypes.put(fieldNamee, jdbcType);
-				}
-				sql.setParamTypes(paramTypes);
-				String psSql=sqlContent.replaceAll("\\{[^\\}]*\\}", "?").replaceAll("#", "").replaceAll("   ", "");
-				sql.setPsSql(psSql);
 				opeateTag.setSql(sql);
+				bulidOtherTags(opeateTag,child);
 				opeateTagMaps.put(opeateTag.getId(), opeateTag);
 			}
+		}
+	}
+
+	/**
+	 * ¶¯Ì¬±êÇ©
+	 * @param opeateTag
+	 * @param child
+	 */
+	@SuppressWarnings("unchecked")
+	private static void bulidOtherTags(OpeateTag opeateTag, Element child) {
+		List<Element> ifElements=child.elements("if");
+		if(!ifElements.isEmpty()) {
+			List<If> ifList=new ArrayList<>();
+			for (Element element : ifElements) {
+				If ifTag=new If();
+				ifTag.setTest(element.attributeValue("test"));
+				ifTag.setContext(element.getTextTrim());
+				ifList.add(ifTag);
+			}
+			opeateTag.setIfList(ifList);
 		}
 	}
 }

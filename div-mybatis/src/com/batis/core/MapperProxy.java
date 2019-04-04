@@ -8,13 +8,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import com.alibaba.fastjson.JSONObject;
+import com.batis.bean.If;
 import com.batis.bean.Mapper;
 import com.batis.bean.OpeateTag;
 import com.batis.bean.Result;
 import com.batis.bean.ResultMap;
+import com.batis.bean.Sql;
 import com.batis.utils.ReflectUtils;
 
 public class MapperProxy<T> implements InvocationHandler {
@@ -66,8 +72,7 @@ public class MapperProxy<T> implements InvocationHandler {
 					throw new RuntimeException("parameterType≤ª∆•≈‰");
 				}
 			}
-			ps = connection.prepareStatement(opeateTag.getSql().getPsSql());
-			buildParams(ps, opeateTag,arg1);
+			ps=buildParams(ps, opeateTag,arg1,connection);
 			System.out.println("sql\t"+opeateTag.getSql().getPsSql());
 			if (isDML(opeateTag.getOpeate())) {
 				o = ps.executeUpdate();
@@ -114,13 +119,25 @@ public class MapperProxy<T> implements InvocationHandler {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private void buildParams(PreparedStatement ps, OpeateTag opeateTag,Object arg1) {
+	private PreparedStatement buildParams(PreparedStatement ps, OpeateTag opeateTag,Object arg1,Connection connection) {
 		try {
 			if(arg1!=null) {
 				String parameterType = opeateTag.getParameterType();
 				Class.forName(parameterType);
+				Sql sql=opeateTag.getSql();
+				String sqlContent=sql.getSqlContent();
+				buildDynamicSQL(sql, sqlContent);
+				if(opeateTag.getIfList()!=null&&opeateTag.getIfList().size()>0) {
+					for (If IfTag : opeateTag.getIfList()) {
+						boolean excuteTest=excuteTest(arg1,IfTag.getTest());
+						if(excuteTest) {
+							buildDynamicSQL(sql, IfTag.getContext(),sql.getParamTypes(),sql.getPsSql());
+						}
+					}
+				}
+				System.out.println(JSONObject.toJSONString(opeateTag.getSql()));
 				Map<String,String> paramTypes=opeateTag.getSql().getParamTypes();
-				//{"password": "VARCHAR"}
+				ps = connection.prepareStatement(opeateTag.getSql().getPsSql());
 				int index=0;
 				for (String fieldName : paramTypes.keySet()) {
 					index++;
@@ -136,17 +153,61 @@ public class MapperProxy<T> implements InvocationHandler {
 						}
 					}
 				}
+			}else {
+				ps = connection.prepareStatement(opeateTag.getSql().getPsSql());
 			}
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("parameterType classNotFound");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		return ps;
+	}
+
+	private boolean excuteTest(Object arg1, String test) {
+		System.out.println(test);
+		if(ReflectUtils.isBaseType(arg1)) {
+			return true;
+		}else {
+			if(arg1 instanceof Map) {
+				Map<?, ?> map=(Map<?, ?>) arg1;
+			}else{
+				//Object fieldValue=ReflectUtils.invokeGet(arg1, "");
+			}
+		}
+		return true;
+	}
+	private void buildDynamicSQL(Sql sql, String sqlContent) {
+		matcher(sql, sqlContent, null);
+		String psSql=sqlContent.replaceAll("\\{[^\\}]*\\}", "?").replaceAll("#", "").replaceAll("   ", "");
+		sql.setPsSql(psSql);
+	}
+	
+	private void buildDynamicSQL(Sql sql, String sqlContent,LinkedHashMap<String,String> paramTypes,String psSql) {
+		matcher(sql, sqlContent, paramTypes);
+		String psSqlDynamic=sqlContent.replaceAll("\\{[^\\}]*\\}", "?").replaceAll("#", "").replaceAll("   ", "");
+		sql.setPsSql(psSql+" "+psSqlDynamic);
+	}
+
+	private void matcher(Sql sql, String sqlContent, LinkedHashMap<String, String> paramTypes) {
+		Pattern p = Pattern.compile("\\{[^\\}]*\\}");
+		if(paramTypes==null) {
+			paramTypes=new LinkedHashMap<>();
+		}
+		Matcher m = p.matcher(sqlContent);
+		while (m.find()) {
+			String item=sqlContent.substring(m.start(), m.end());
+			String newItem=item.substring(1, item.length()-1);
+			String[] array=newItem.split(",");
+			String fieldName=array[0];
+			String jdbcType=array[1].substring("jdbcType=".length());
+			paramTypes.put(fieldName, jdbcType);
+		}
+		sql.setParamTypes(paramTypes);
 	}
 
 	private boolean isDML(String opreate) {
 		return "insert".equals(opreate) || "update".equals(opreate) || "delete".equals(opreate);
-
 	}
 
 }
