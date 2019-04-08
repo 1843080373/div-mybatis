@@ -1,4 +1,4 @@
-package com.batis.bean;
+package com.batis.bean.tag;
 
 import java.util.LinkedHashMap;
 

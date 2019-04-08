@@ -16,12 +16,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSONObject;
-import com.batis.bean.If;
 import com.batis.bean.Mapper;
 import com.batis.bean.OpeateTag;
 import com.batis.bean.Result;
 import com.batis.bean.ResultMap;
-import com.batis.bean.Sql;
+import com.batis.bean.tag.If;
+import com.batis.bean.tag.Sql;
 import com.batis.utils.ReflectUtils;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Expression;

@@ -20,5 +20,13 @@ public interface UserMapper {
 	public List<User> listCondition2(User user);
 	
 	public List<User> queryCondition3(Map<String,Object> param);
+	
+	public List<User> queryCondition4(Map<String,Object> param);
+	
+	public int updateCondition(User user);
+	
+	public List<User> queryCondition5(Map<String,Object> param);
+	
+	public List<User> queryCondition6(Map<String,Object> param);
 
 }

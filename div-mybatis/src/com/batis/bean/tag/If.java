@@ -1,4 +1,4 @@
-package com.batis.bean;
+package com.batis.bean.tag;
 
 public class If {
 	private String test;

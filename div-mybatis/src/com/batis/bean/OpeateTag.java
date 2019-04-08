@@ -1,6 +1,13 @@
 package com.batis.bean;
 
+import java.util.LinkedList;
 import java.util.List;
+
+import com.batis.bean.tag.Choose;
+import com.batis.bean.tag.Foreach;
+import com.batis.bean.tag.If;
+import com.batis.bean.tag.Set;
+import com.batis.bean.tag.Sql;
 
 public class OpeateTag {
 	private String id;
@@ -10,6 +17,10 @@ public class OpeateTag {
 	private String alias;
 	private Sql sql;
 	private List<If> ifList;
+	private Choose choose;
+	private boolean hasWhere;
+	private LinkedList<Foreach> foreachList;
+	private Set set;
 	public String getId() {
 		return id;
 	}
@@ -53,5 +64,29 @@ public class OpeateTag {
 	public void setIfList(List<If> ifList) {
 		this.ifList = ifList;
 	}
-	
+	public Choose getChoose() {
+		return choose;
+	}
+	public void setChoose(Choose choose) {
+		this.choose = choose;
+	}
+	public boolean isHasWhere() {
+		return hasWhere;
+	}
+	public void setHasWhere(boolean hasWhere) {
+		this.hasWhere = hasWhere;
+	}
+
+	public LinkedList<Foreach> getForeachList() {
+		return foreachList;
+	}
+	public void setForeachList(LinkedList<Foreach> foreachList) {
+		this.foreachList = foreachList;
+	}
+	public Set getSet() {
+		return set;
+	}
+	public void setSet(Set set) {
+		this.set = set;
+	}
 }

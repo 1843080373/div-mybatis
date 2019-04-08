@@ -8,11 +8,10 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -21,14 +20,17 @@ import org.dom4j.io.SAXReader;
 
 import com.alibaba.fastjson.JSONObject;
 import com.batis.bean.Environment;
-import com.batis.bean.If;
 import com.batis.bean.Mapper;
 import com.batis.bean.MybatisCfg;
 import com.batis.bean.MybatisDataSource;
 import com.batis.bean.OpeateTag;
 import com.batis.bean.Result;
 import com.batis.bean.ResultMap;
-import com.batis.bean.Sql;
+import com.batis.bean.tag.Choose;
+import com.batis.bean.tag.Foreach;
+import com.batis.bean.tag.If;
+import com.batis.bean.tag.Sql;
+import com.batis.bean.tag.When;
 import com.batis.utils.StringUtils;
 public class SqlSessionFactory {
 
@@ -192,12 +194,13 @@ public class SqlSessionFactory {
 	}
 
 	/**
-	 * 动态标签
+	  *     动态标签
 	 * @param opeateTag
 	 * @param child
 	 */
 	@SuppressWarnings("unchecked")
 	private static void bulidOtherTags(OpeateTag opeateTag, Element child) {
+		//if begin
 		List<Element> ifElements=child.elements("if");
 		if(!ifElements.isEmpty()) {
 			List<If> ifList=new ArrayList<>();
@@ -209,5 +212,58 @@ public class SqlSessionFactory {
 			}
 			opeateTag.setIfList(ifList);
 		}
+		//if end
+		
+		//where begin
+		if(!child.elements("where").isEmpty()) {
+			opeateTag.setHasWhere(true);
+		}
+		//where end
+		
+		//choose begin
+		Element chooseElement=child.element("choose");
+		if(chooseElement!=null) {
+			Choose choose=new Choose();
+			List<Element> whenElements=chooseElement.elements("when");
+			if(!whenElements.isEmpty()) {
+				LinkedList<When> whenLists=new LinkedList<>();
+				for (Element element : whenElements) {
+					When whenTag=new When();
+					whenTag.setTest(element.attributeValue("test"));
+					whenTag.setContext(element.getTextTrim());
+					whenLists.add(whenTag);
+				}
+				choose.setWhenLists(whenLists);
+			}
+			
+			Element otherwiseElement=child.element("otherwise");
+			if(otherwiseElement!=null) {
+				choose.setOtherwise(otherwiseElement.getTextTrim());
+			}
+			opeateTag.setChoose(choose);
+		}
+		//choose end
+		
+		//foreachList begin
+		List<Element> foreachListElements=child.elements("foreach");
+		if(!foreachListElements.isEmpty()) {
+			LinkedList<Foreach> foreachList=new LinkedList<>();
+			for (Element element : ifElements) {
+				Foreach foreachTag=new Foreach();
+				foreachTag.setItem(element.attributeValue("item"));
+				foreachTag.setIndex(element.attributeValue("index"));
+				foreachTag.setCollection(element.attributeValue("collection"));
+				foreachTag.setOpen(element.attributeValue("open"));
+				foreachTag.setSeparator(element.attributeValue("separator"));
+				foreachTag.setClose(element.attributeValue("close"));
+				foreachTag.setContext(element.getTextTrim());
+				foreachList.add(foreachTag);
+			}
+			opeateTag.setForeachList(foreachList);
+		}
+		//foreachList end
+		
+		//set begin
+		//set end
 	}
 }

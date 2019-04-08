@@ -22,7 +22,7 @@
 		from user 
 		WHERE 1=1
 		<if test="param != nil">
-			AND user_name LIKE CONCAT('%',#{param,jdbcType=VARCHAR},'%')
+			AND user_name LIKE CONCAT('%',#{userName,jdbcType=VARCHAR},'%')
 		</if>
 	</select>
 	
@@ -53,6 +53,50 @@
 			AND phone=#{phone,jdbcType=VARCHAR}
 		</if>
 	</select>
+	
+	<select id="queryCondition4" resultMap="BaseResultMap"
+		parameterType="java.util.Map" alias="param">
+		select
+		user_id, user_name, password, phone
+		from user
+	  <where>
+		 <choose>
+		    <when test="param.userName != nil">
+		      AND user_name LIKE CONCAT('%',#{userName,jdbcType=VARCHAR},'%')
+		    </when>
+		    <otherwise>
+		      AND user_id= 1
+		    </otherwise>
+	     </choose>
+      </where>
+	</select>
+	
+	<select id="queryCondition5" resultMap="BaseResultMap"
+		parameterType="java.util.Map" alias="param">
+		select
+		user_id, user_name, password, phone
+		from user
+		<where>
+	         <if test="param.userName != nil">
+				AND user_name LIKE CONCAT('%',#{userName,jdbcType=VARCHAR},'%')
+			 </if>
+			 <if test="param.phone != nil">
+				AND phone=#{phone,jdbcType=VARCHAR}
+			 </if>
+	     </where>
+	</select>
+	
+	<select id="queryCondition6" resultMap="BaseResultMap"
+		parameterType="java.util.Map" alias="param">
+		select
+		user_id, user_name, password, phone
+		from user
+		where 1=1
+	    and  user_id IN
+			<foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+              #{id}
+            </foreach>
+	</select>
 	<delete id="delete" parameterType="java.lang.Integer">
 		delete from user
 		where user_id = #{userId,jdbcType=INTEGER}
@@ -64,11 +108,31 @@
 		#{phone,jdbcType=VARCHAR})
 	</insert>
 
-	<update id="update" parameterType="com.batis.po.User">
+    <update id="update" parameterType="com.batis.po.User">
 		update user
 		set user_name = #{userName,jdbcType=VARCHAR},
 		password = #{password,jdbcType=VARCHAR},
 		phone = #{phone,jdbcType=VARCHAR}
 		where user_id = #{userId,jdbcType=INTEGER}
+	</update>
+
+	<update id="updateCondition" parameterType="com.batis.po.User" alias="param">
+		update user
+		<set>
+           <if test="param.username != nil">
+               user_name = #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="param.password != nil">
+               password = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="param.phone != nil">
+               phone = #{phone,jdbcType=VARCHAR},
+            </if>
+        </set>
+        <where> 
+           <if test="param.userId != nil">
+               user_id = #{userId,jdbcType=INTEGER}
+           </if>
+        </where>
 	</update>
 </mapper>
