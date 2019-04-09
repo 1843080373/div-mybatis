@@ -188,6 +188,7 @@ public class SqlSessionFactory {
 				String sqlContent=child.getTextTrim();
 				Sql sql=new Sql();
 				sql.setSqlContent(sqlContent);
+				sql.setPsSql(sqlContent);
 				opeateTag.setSql(sql);
 				bulidOtherTags(opeateTag,child);
 				opeateTagMaps.put(opeateTag.getId(), opeateTag);

@@ -20,6 +20,58 @@ public class DemoTest {
 		testUser();
 	}
 
+	private static void testUser() {
+		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("mybatis.cfg.xml");
+		SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+		SqlSession sqlSession = sqlSessionFactory.openSession();
+		UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+		User user = new User();
+		user.setUserId(1);
+		user.setUserName("张三99");
+		user.setPassword("99999999");
+		user.setPhone("9999888888");
+		// userMapper.save(user);
+		// userMapper.update(user);
+		// userMapper.delete(1);
+
+		// List<User> list = userMapper.list();
+		// System.out.println(JSONObject.toJSON(list));
+		// userMapper.listCondition1("22")
+		List<User> list = null;
+
+		/*
+		 * list = userMapper.queryCondition3(new HashMap<String, Object>() {
+		 * 
+		 * private static final long serialVersionUID = 1L;
+		 * 
+		 * { put("userName", "22"); put("phone", "1807657569"); } });
+		 */
+		
+		//list = userMapper.listCondition2(new User(null, null, null, "张三"));
+		
+		 //list = userMapper.listCondition1("张三");
+		
+		/*
+		 * list = userMapper.queryCondition6(new HashMap<String, Object>() {
+		 * 
+		 * private static final long serialVersionUID = 1L;
+		 * 
+		 * { put("ids", new Object[] { 1139, 1141 }); } });
+		 */
+		  
+		
+		  list = userMapper.queryCondition5(new HashMap<String, Object>() {
+		  
+		  private static final long serialVersionUID = 1L;
+		  
+		  { put("userName", "张"); } });
+		  
+		  System.out.println(JSONObject.toJSON(list));
+		 
+		 
+		 //userMapper.updateCondition(user);
+	}
+
 	@SuppressWarnings("unused")
 	private static void testAnswer() {
 		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("mybatis.cfg.xml");
@@ -44,58 +96,4 @@ public class DemoTest {
 		System.out.println(JSONObject.toJSON(list));
 	}
 
-	private static void testUser() {
-		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("mybatis.cfg.xml");
-		SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
-		SqlSession sqlSession = sqlSessionFactory.openSession();
-		UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
-		User user = new User();
-		user.setUserId(1);
-		user.setUserName("张三");
-		user.setPassword("123456");
-		user.setPhone("1807657569");
-		// int rows = userMapper.save(user);
-		// int rows = userMapper.update(user);
-		// int rows = userMapper.delete(2);
-		// System.out.println(rows);
-		/*
-		 * List<User> list=userMapper.list();
-		 * System.out.println(JSONObject.toJSON(list));
-		 */
-		// List<User> list=userMapper.listCondition("22");
-		// System.out.println(JSONObject.toJSON(list));
-		/*
-		 * List<User> list=userMapper.queryCondition3(new HashMap<String, Object>(){
-		 *//**
-			* 
-			*//*
-				 * private static final long serialVersionUID = 1L;
-				 * 
-				 * { put("userName", "张三"); put("phone", "1807657569"); } });
-				 */
-		/*
-		 * List<User> list = userMapper.listCondition2(new User(null, null, null,
-		 * "张三"));
-		 */
-		// List<User> list = userMapper.listCondition1("张三");
-		
-		/*
-		 * List<User> list = userMapper.queryCondition6(new HashMap<String, Object>() {
-		 * 
-		 * private static final long serialVersionUID = 1L;
-		 * 
-		 * { put("ids",new Object[] { 1, 1139, 1141}); } });
-		 */
-		
-		/*
-		 * List<User> list = userMapper.queryCondition5(new HashMap<String, Object>() {
-		 * 
-		 * private static final long serialVersionUID = 1L;
-		 * 
-		 * { put("userName","张"); put("phone", "1807657569"); } });
-		 */
-		//System.out.println(JSONObject.toJSON(list));
-		 
-		userMapper.updateCondition(user);
-	}
 }

@@ -38,6 +38,7 @@ public class MapperProxy<T> implements InvocationHandler {
 
 	private SqlSession sqlSession;
 
+	private List<Object> foreachData=new LinkedList<>();
 	private static final String WHERE_SQL=" WHERE 1=1 ";
 	public void setSqlSession(SqlSession sqlSession) {
 		this.sqlSession = sqlSession;
@@ -75,7 +76,7 @@ public class MapperProxy<T> implements InvocationHandler {
 			}
 			System.out.println("mapper\t" + namespace);
 			System.out.println("method\t" + methodName);
-			System.out.println("arg\t"+arg1);
+			System.out.println("arg\t"+(arg!=null?JSONObject.toJSONString(arg1):null));
 			String parameterType=opeateTag.getParameterType();
 			if(parameterType!=null&&arg!=null&&!ReflectUtils.isBaseType(arg1)&&!(arg1 instanceof Map)) {
 				String argType=arg1.getClass().getName();
@@ -138,7 +139,7 @@ public class MapperProxy<T> implements InvocationHandler {
 				Class.forName(parameterType);
 				Sql sql=opeateTag.getSql();
 				String sqlContent=sql.getSqlContent();
-				if(opeateTag.getWhere()!=null) {
+				if(opeateTag.getWhere()!=null&&opeateTag.getSet()==null) {
 					sqlContent+=WHERE_SQL+(opeateTag.getWhere().getPreSql());
 				}
 				sql.setSqlContent(sqlContent);
@@ -146,6 +147,7 @@ public class MapperProxy<T> implements InvocationHandler {
 				System.out.println(JSONObject.toJSONString(opeateTag.getSql()));
 				Map<String,String> paramTypes=opeateTag.getSql().getParamTypes();
 				ps = connection.prepareStatement(opeateTag.getSql().getPsSql());
+				
 				int index=0;
 				for (String fieldName : paramTypes.keySet()) {
 					index++;
@@ -159,6 +161,11 @@ public class MapperProxy<T> implements InvocationHandler {
 							Object fieldValue=ReflectUtils.invokeGet(arg1, fieldName);
 							ps.setObject(index, fieldValue);
 						}
+					}
+				}
+				if(foreachData!=null&&foreachData.size()>0) {
+					for (int i = 0; i < foreachData.size(); i++) {
+						ps.setObject(index+(i+1), foreachData.get(i));
 					}
 				}
 			}else {
@@ -232,7 +239,7 @@ public class MapperProxy<T> implements InvocationHandler {
 				String context=foreach.getContext();
 				Object entity=null;
 				if(arg1 instanceof Map) {
-					Map map=(Map) arg1;
+					Map<?, ?> map=(Map<?, ?>) arg1;
 					entity=map.get(collection);
 				}else{
 					entity=ReflectUtils.invokeGet(arg1, collection);
@@ -242,22 +249,30 @@ public class MapperProxy<T> implements InvocationHandler {
 					if(entity instanceof Map) {
 						Map<?, ?> ent=(Map<?, ?>)entity;
 						for (Entry<?, ?> entry : ent.entrySet()) {
-							newPSsql.append("?,");
+							newPSsql.append("?"+separator);
+							foreachData.add(entry.getValue());
+							buildDynamicSQLForeach(sql, context,sql.getParamTypes(),newPSsql.toString());
 						}
 					}else if(entity instanceof Collection) {
 						Collection<?> ent=(Collection<?>)entity;
 						for (Object o : ent) {
-							newPSsql.append("?,");
+							newPSsql.append("?"+separator);
+							foreachData.add(o);
+							buildDynamicSQLForeach(sql, context,sql.getParamTypes(),newPSsql.toString());
 						}
 					}else if(entity instanceof java.util.Set) {
 						java.util.Set<?> ent=(java.util.Set<?>)entity;
 						for (Object o : ent) {
-							newPSsql.append("?,");						
+							newPSsql.append("?"+separator);
+							foreachData.add(o);
+							buildDynamicSQLForeach(sql,context,sql.getParamTypes(),newPSsql.toString());
 						}
 					}else if(entity instanceof Object[]){
 						Object[] ent=(Object[])entity;
 						for (int i = 0; i < ent.length; i++) {
-							newPSsql.append("?,");
+							newPSsql.append("?"+separator);
+							foreachData.add(ent[i]);
+							buildDynamicSQLForeach(sql,context,sql.getParamTypes(),newPSsql.toString());
 						}
 					}else {
 						throw new RuntimeException("²ÎÊý´íÎó");
@@ -275,7 +290,9 @@ public class MapperProxy<T> implements InvocationHandler {
 			Sql new_sql=sql;
 			new_sql.setPsSql(new_sql.getPsSql()+" SET ");
 			new_sql.setSqlContent(new_sql.getSqlContent()+" SET ");
+			
 			opeateTag.setSql(new_sql);
+			
 			for (If IfTag : set.getIfList()) {
 				boolean excuteTest=excuteTest(arg1,IfTag.getTest(),alias);
 				if(excuteTest) {
@@ -303,7 +320,10 @@ public class MapperProxy<T> implements InvocationHandler {
 		String psSql=sqlContent.replaceAll("\\{[^\\}]*\\}", "?").replaceAll("#", "").replaceAll("   ", "");
 		sql.setPsSql(psSql);
 	}
-	
+	private void buildDynamicSQLForeach(Sql sql, String sqlContent,LinkedHashMap<String,String> paramTypes,String psSql) {
+		String psSqlDynamic=sqlContent.replaceAll("\\{[^\\}]*\\}", "").replaceAll("#", "").replaceAll("   ", "");
+		sql.setPsSql(sql.getPsSql()+" "+psSqlDynamic);
+	}
 	private void buildDynamicSQL(Sql sql, String sqlContent,LinkedHashMap<String,String> paramTypes,String psSql) {
 		matcher(sql, sqlContent, paramTypes);
 		String psSqlDynamic=sqlContent.replaceAll("\\{[^\\}]*\\}", "?").replaceAll("#", "").replaceAll("   ", "");
