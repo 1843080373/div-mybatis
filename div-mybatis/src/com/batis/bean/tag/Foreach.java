@@ -8,6 +8,7 @@ public class Foreach {
 	private String separator;
 	private String close;
 	private String context;
+	
 	public String getItem() {
 		return item;
 	}

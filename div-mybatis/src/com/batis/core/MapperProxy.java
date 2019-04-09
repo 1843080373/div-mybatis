@@ -8,10 +8,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,8 +23,13 @@ import com.batis.bean.Mapper;
 import com.batis.bean.OpeateTag;
 import com.batis.bean.Result;
 import com.batis.bean.ResultMap;
+import com.batis.bean.tag.Choose;
+import com.batis.bean.tag.Foreach;
 import com.batis.bean.tag.If;
+import com.batis.bean.tag.Set;
 import com.batis.bean.tag.Sql;
+import com.batis.bean.tag.When;
+import com.batis.bean.tag.Where;
 import com.batis.utils.ReflectUtils;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Expression;
@@ -30,6 +38,7 @@ public class MapperProxy<T> implements InvocationHandler {
 
 	private SqlSession sqlSession;
 
+	private static final String WHERE_SQL=" WHERE 1=1 ";
 	public void setSqlSession(SqlSession sqlSession) {
 		this.sqlSession = sqlSession;
 	}
@@ -129,15 +138,11 @@ public class MapperProxy<T> implements InvocationHandler {
 				Class.forName(parameterType);
 				Sql sql=opeateTag.getSql();
 				String sqlContent=sql.getSqlContent();
-				buildDynamicSQL(sql, sqlContent);
-				if(opeateTag.getIfList()!=null&&opeateTag.getIfList().size()>0) {
-					for (If IfTag : opeateTag.getIfList()) {
-						boolean excuteTest=excuteTest(arg1,IfTag.getTest(),opeateTag.getAlias());
-						if(excuteTest) {
-							buildDynamicSQL(sql, IfTag.getContext(),sql.getParamTypes(),sql.getPsSql());
-						}
-					}
+				if(opeateTag.getWhere()!=null) {
+					sqlContent+=WHERE_SQL+(opeateTag.getWhere().getPreSql());
 				}
+				sql.setSqlContent(sqlContent);
+				buildALLSQL(opeateTag, arg1,sql);
 				System.out.println(JSONObject.toJSONString(opeateTag.getSql()));
 				Map<String,String> paramTypes=opeateTag.getSql().getParamTypes();
 				ps = connection.prepareStatement(opeateTag.getSql().getPsSql());
@@ -165,6 +170,120 @@ public class MapperProxy<T> implements InvocationHandler {
 			e.printStackTrace();
 		}
 		return ps;
+	}
+	
+	private void buildALLSQL(OpeateTag opeateTag, Object arg1, Sql sql) {
+		buildDynamicSQL(sql, sql.getSqlContent());
+		Where where=opeateTag.getWhere();
+		if(where!=null) {
+			buildSetSQL(opeateTag,opeateTag.getSet(), arg1, sql,opeateTag.getAlias());
+			buildIfSQL(where.getIfList(),  arg1, sql,opeateTag.getAlias());
+			buildChooseSQL(where.getChoose(), arg1, sql,opeateTag.getAlias());
+			buildForeachSQL(where.getForeachList(), arg1, sql);
+		}else {
+			buildSetSQL(opeateTag,opeateTag.getSet(), arg1, sql,opeateTag.getAlias());
+			buildIfSQL(opeateTag.getIfList(),  arg1, sql,opeateTag.getAlias());
+			buildChooseSQL(opeateTag.getChoose(), arg1, sql,opeateTag.getAlias());
+			buildForeachSQL(opeateTag.getForeachList(), arg1, sql);
+		}
+	}
+
+	private void buildIfSQL(List<If> ifList, Object arg1, Sql sql,String alias) {
+		if(ifList!=null&&ifList.size()>0) {
+			for (If IfTag : ifList) {
+				boolean excuteTest=excuteTest(arg1,IfTag.getTest(),alias);
+				if(excuteTest) {
+					buildDynamicSQL(sql, IfTag.getContext(),sql.getParamTypes(),sql.getPsSql());
+				}
+			}
+		}
+	}
+	
+	private void buildChooseSQL(Choose choose, Object arg1, Sql sql,String alias) {
+		if(choose!=null) {
+			LinkedList<When> whenLists=choose.getWhenLists();
+			boolean excuteOtherwise=false;
+			if(!whenLists.isEmpty()) {
+				for (When when : whenLists) {
+					boolean excuteTest=excuteTest(arg1,when.getTest(),alias);
+					if(excuteTest) {
+						buildDynamicSQL(sql, when.getContext(),sql.getParamTypes(),sql.getPsSql());
+					}else {
+						excuteOtherwise=true;
+					}
+				}
+			}
+			String otherwise=choose.getOtherwise();
+			if(!"".equals(otherwise)&&excuteOtherwise) {
+				buildDynamicSQL(sql, otherwise,sql.getParamTypes(),sql.getPsSql());
+			}
+		}
+	}
+	
+	private void buildForeachSQL(LinkedList<Foreach> foreachList, Object arg1, Sql sql) {
+		if(foreachList!=null&&foreachList.size()>0) {
+			for (Foreach foreach : foreachList) {
+				String item=foreach.getItem();
+				String index=foreach.getIndex();
+				String collection=foreach.getCollection();
+				String open=foreach.getOpen();
+				String separator=foreach.getSeparator();
+				String close=foreach.getClose();
+				String context=foreach.getContext();
+				Object entity=null;
+				if(arg1 instanceof Map) {
+					Map map=(Map) arg1;
+					entity=map.get(collection);
+				}else{
+					entity=ReflectUtils.invokeGet(arg1, collection);
+				}
+				if(entity!=null) {
+					StringBuilder newPSsql=new StringBuilder(open);
+					if(entity instanceof Map) {
+						Map<?, ?> ent=(Map<?, ?>)entity;
+						for (Entry<?, ?> entry : ent.entrySet()) {
+							newPSsql.append("?,");
+						}
+					}else if(entity instanceof Collection) {
+						Collection<?> ent=(Collection<?>)entity;
+						for (Object o : ent) {
+							newPSsql.append("?,");
+						}
+					}else if(entity instanceof java.util.Set) {
+						java.util.Set<?> ent=(java.util.Set<?>)entity;
+						for (Object o : ent) {
+							newPSsql.append("?,");						
+						}
+					}else if(entity instanceof Object[]){
+						Object[] ent=(Object[])entity;
+						for (int i = 0; i < ent.length; i++) {
+							newPSsql.append("?,");
+						}
+					}else {
+						throw new RuntimeException("²ÎÊý´íÎó");
+					}
+					newPSsql=newPSsql.deleteCharAt(newPSsql.length()-1);
+					newPSsql.append(close);
+					sql.setPsSql(sql.getPsSql()+" "+newPSsql);
+				}
+			}
+		}
+	}
+	
+	private void buildSetSQL(OpeateTag opeateTag, Set set, Object arg1, Sql sql,String alias) {
+		if(set!=null&&set.getIfList()!=null&&set.getIfList().size()>0) {
+			Sql new_sql=sql;
+			new_sql.setPsSql(new_sql.getPsSql()+" SET ");
+			new_sql.setSqlContent(new_sql.getSqlContent()+" SET ");
+			opeateTag.setSql(new_sql);
+			for (If IfTag : set.getIfList()) {
+				boolean excuteTest=excuteTest(arg1,IfTag.getTest(),alias);
+				if(excuteTest) {
+					buildDynamicSQL(sql, IfTag.getContext(),sql.getParamTypes(),sql.getPsSql());
+				}
+			}
+			sql.setPsSql(new StringBuffer(sql.getPsSql()).deleteCharAt(sql.getPsSql().length()-1).toString());
+		}
 	}
 
 	private boolean excuteTest(Object arg1, String test,String alias) {

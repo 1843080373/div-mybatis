@@ -29,8 +29,10 @@ import com.batis.bean.ResultMap;
 import com.batis.bean.tag.Choose;
 import com.batis.bean.tag.Foreach;
 import com.batis.bean.tag.If;
+import com.batis.bean.tag.Set;
 import com.batis.bean.tag.Sql;
 import com.batis.bean.tag.When;
+import com.batis.bean.tag.Where;
 import com.batis.utils.StringUtils;
 public class SqlSessionFactory {
 
@@ -198,32 +200,49 @@ public class SqlSessionFactory {
 	 * @param opeateTag
 	 * @param child
 	 */
-	@SuppressWarnings("unchecked")
 	private static void bulidOtherTags(OpeateTag opeateTag, Element child) {
 		//if begin
-		List<Element> ifElements=child.elements("if");
-		if(!ifElements.isEmpty()) {
-			List<If> ifList=new ArrayList<>();
-			for (Element element : ifElements) {
-				If ifTag=new If();
-				ifTag.setTest(element.attributeValue("test"));
-				ifTag.setContext(element.getTextTrim());
-				ifList.add(ifTag);
-			}
-			opeateTag.setIfList(ifList);
-		}
+		List<If> ifList=buildIfTag(child);
+		opeateTag.setIfList(ifList);
 		//if end
 		
 		//where begin
-		if(!child.elements("where").isEmpty()) {
-			opeateTag.setHasWhere(true);
+		Element whereElement=child.element("where");
+		if(whereElement!=null) {
+			Where where=new Where();
+			where.setPreSql(whereElement.getTextTrim());
+			where.setIfList(buildIfTag(whereElement));
+			where.setChoose(buildChooseWhenTag(whereElement));
+			where.setForeachList(buildForeachTag(whereElement));
+			opeateTag.setWhere(where);
 		}
 		//where end
 		
 		//choose begin
+		Choose choose=buildChooseWhenTag(child);
+		opeateTag.setChoose(choose);
+		//choose end
+		
+		//foreachList begin
+		LinkedList<Foreach> foreachList=buildForeachTag(child);
+		opeateTag.setForeachList(foreachList);
+		//foreachList end
+		
+		//set begin
+		Element setElement=child.element("set");
+		if(setElement!=null) {
+			Set set=new Set();
+			set.setIfList(buildIfTag(setElement));
+			opeateTag.setSet(set);
+		}
+		//set end
+	}
+
+	private static Choose  buildChooseWhenTag(Element child) {
 		Element chooseElement=child.element("choose");
 		if(chooseElement!=null) {
 			Choose choose=new Choose();
+			@SuppressWarnings("unchecked")
 			List<Element> whenElements=chooseElement.elements("when");
 			if(!whenElements.isEmpty()) {
 				LinkedList<When> whenLists=new LinkedList<>();
@@ -235,20 +254,21 @@ public class SqlSessionFactory {
 				}
 				choose.setWhenLists(whenLists);
 			}
-			
-			Element otherwiseElement=child.element("otherwise");
+			Element otherwiseElement=chooseElement.element("otherwise");
 			if(otherwiseElement!=null) {
 				choose.setOtherwise(otherwiseElement.getTextTrim());
 			}
-			opeateTag.setChoose(choose);
+			return choose;
 		}
-		//choose end
-		
-		//foreachList begin
-		List<Element> foreachListElements=child.elements("foreach");
+		return null;
+	}
+
+	private static LinkedList<Foreach> buildForeachTag(Element ele) {
+		@SuppressWarnings("unchecked")
+		List<Element> foreachListElements=ele.elements("foreach");
 		if(!foreachListElements.isEmpty()) {
 			LinkedList<Foreach> foreachList=new LinkedList<>();
-			for (Element element : ifElements) {
+			for (Element element : foreachListElements) {
 				Foreach foreachTag=new Foreach();
 				foreachTag.setItem(element.attributeValue("item"));
 				foreachTag.setIndex(element.attributeValue("index"));
@@ -259,11 +279,24 @@ public class SqlSessionFactory {
 				foreachTag.setContext(element.getTextTrim());
 				foreachList.add(foreachTag);
 			}
-			opeateTag.setForeachList(foreachList);
+			return foreachList;
 		}
-		//foreachList end
-		
-		//set begin
-		//set end
+		return null;
+	}
+
+	private static List<If> buildIfTag(Element ele) {
+		@SuppressWarnings("unchecked")
+		List<Element> ifElements=ele.elements("if");
+		if(!ifElements.isEmpty()) {
+			List<If> ifList=new ArrayList<>();
+			for (Element element : ifElements) {
+				If ifTag=new If();
+				ifTag.setTest(element.attributeValue("test"));
+				ifTag.setContext(element.getTextTrim());
+				ifList.add(ifTag);
+			}
+			return ifList;
+		}
+		return null;
 	}
 }

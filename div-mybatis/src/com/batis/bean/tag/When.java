@@ -15,5 +15,4 @@ public class When {
 	public void setContext(String context) {
 		this.context = context;
 	}
-	
 }

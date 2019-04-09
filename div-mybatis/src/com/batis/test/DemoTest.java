@@ -44,7 +44,6 @@ public class DemoTest {
 		System.out.println(JSONObject.toJSON(list));
 	}
 
-	@SuppressWarnings("unused")
 	private static void testUser() {
 		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("mybatis.cfg.xml");
 		SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
@@ -75,9 +74,28 @@ public class DemoTest {
 				 * { put("userName", "张三"); put("phone", "1807657569"); } });
 				 */
 		/*
-		 * List<User> list = userMapper.listCondition2(new User(null, null, null, "张三"));
+		 * List<User> list = userMapper.listCondition2(new User(null, null, null,
+		 * "张三"));
 		 */
-		List<User> list = userMapper.listCondition1("张三");
-		System.out.println(JSONObject.toJSON(list));
+		// List<User> list = userMapper.listCondition1("张三");
+		
+		/*
+		 * List<User> list = userMapper.queryCondition6(new HashMap<String, Object>() {
+		 * 
+		 * private static final long serialVersionUID = 1L;
+		 * 
+		 * { put("ids",new Object[] { 1, 1139, 1141}); } });
+		 */
+		
+		/*
+		 * List<User> list = userMapper.queryCondition5(new HashMap<String, Object>() {
+		 * 
+		 * private static final long serialVersionUID = 1L;
+		 * 
+		 * { put("userName","张"); put("phone", "1807657569"); } });
+		 */
+		//System.out.println(JSONObject.toJSON(list));
+		 
+		userMapper.updateCondition(user);
 	}
 }

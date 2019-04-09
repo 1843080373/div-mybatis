@@ -8,6 +8,7 @@ import com.batis.bean.tag.Foreach;
 import com.batis.bean.tag.If;
 import com.batis.bean.tag.Set;
 import com.batis.bean.tag.Sql;
+import com.batis.bean.tag.Where;
 
 public class OpeateTag {
 	private String id;
@@ -16,9 +17,11 @@ public class OpeateTag {
 	private String opeate;
 	private String alias;
 	private Sql sql;
+	
+	
 	private List<If> ifList;
 	private Choose choose;
-	private boolean hasWhere;
+	private Where where;
 	private LinkedList<Foreach> foreachList;
 	private Set set;
 	public String getId() {
@@ -70,13 +73,13 @@ public class OpeateTag {
 	public void setChoose(Choose choose) {
 		this.choose = choose;
 	}
-	public boolean isHasWhere() {
-		return hasWhere;
+	
+	public Where getWhere() {
+		return where;
 	}
-	public void setHasWhere(boolean hasWhere) {
-		this.hasWhere = hasWhere;
+	public void setWhere(Where where) {
+		this.where = where;
 	}
-
 	public LinkedList<Foreach> getForeachList() {
 		return foreachList;
 	}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mapper namespace="com.batis.mapper.AnswerMapper" >
+  <resultMap id="BaseResultMap" type="com.batis.po.Answer" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="enabled" property="enabled" jdbcType="BIT" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="version" property="version" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="questionnaire_id" property="questionnaireId" jdbcType="INTEGER" />
+    <result column="choice_id" property="choiceId" jdbcType="INTEGER" />
+  </resultMap>
+   <select id="selectAll" resultMap="BaseResultMap" >
+    select 
+     id, create_time, enabled, update_time, version, user_id, questionnaire_id, choice_id
+    from answer
+  </select>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+     id, create_time, enabled, update_time, version, user_id, questionnaire_id, choice_id
+    from answer
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from answer
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <insert id="insert" parameterType="com.batis.po.Answer" >
+    insert into answer (id, create_time, enabled, 
+      update_time, version, user_id, 
+      questionnaire_id, choice_id)
+    values (#{id,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{enabled,jdbcType=BIT}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{version,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, 
+      #{questionnaireId,jdbcType=INTEGER}, #{choiceId,jdbcType=INTEGER})
+  </insert>
+ 
+  <update id="updateByPrimaryKey" parameterType="com.batis.po.Answer" >
+    update answer
+    set create_time = #{createTime,jdbcType=TIMESTAMP},
+      enabled = #{enabled,jdbcType=BIT},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      version = #{version,jdbcType=INTEGER},
+      user_id = #{userId,jdbcType=INTEGER},
+      questionnaire_id = #{questionnaireId,jdbcType=INTEGER},
+      choice_id = #{choiceId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
