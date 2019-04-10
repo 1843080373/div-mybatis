@@ -1,0 +1,76 @@
+2018-06-26 11:22:43,055 INFO com.aliyun.oss.demo.HelloOSS: Started
+2018-06-26 11:22:43,685 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2018-06-26 11:23:18,219 INFO com.aliyun.oss.demo.HelloOSS: Started
+2018-06-26 11:23:19,385 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2018-06-28 10:14:51,797 INFO com.aliyun.oss.demo.HelloOSS: Started
+2018-06-28 10:14:53,449 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:09:23,594 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:09:33,324 WARN com.aliyun.oss: [Server]Unable to execute HTTP request: The request signature we calculated does not match the signature you provided. Check your key and signing method.
+[ErrorCode]: SignatureDoesNotMatch
+[RequestId]: 5CAD96A924C3973C78D6C4D2
+[HostId]: test-bucket2019.oss-cn-beijing.aliyuncs.com
+[ResponseError]:
+<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>SignatureDoesNotMatch</Code>
+  <Message>The request signature we calculated does not match the signature you provided. Check your key and signing method.</Message>
+  <RequestId>5CAD96A924C3973C78D6C4D2</RequestId>
+  <HostId>test-bucket2019.oss-cn-beijing.aliyuncs.com</HostId>
+  <OSSAccessKeyId>LTAIvqwrlLQZtC4T</OSSAccessKeyId>
+  <SignatureProvided>f5rLdpzV41P+y6X7u2DWyyxi0JE=</SignatureProvided>
+  <StringToSign>GET
+
+
+Wed, 10 Apr 2019 07:09:28 GMT
+/test-bucket2019/?acl</StringToSign>
+  <StringToSignBytes>47 45 54 0A 0A 0A 57 65 64 2C 20 31 30 20 41 70 72 20 32 30 31 39 20 30 37 3A 30 39 3A 32 38 20 47 4D 54 0A 2F 74 65 73 74 2D 62 75 63 6B 65 74 32 30 31 39 2F 3F 61 63 6C </StringToSignBytes>
+</Error>
+
+2019-04-10 15:09:33,522 WARN com.aliyun.oss: [Server]Unable to execute HTTP request: The request signature we calculated does not match the signature you provided. Check your key and signing method.
+[ErrorCode]: SignatureDoesNotMatch
+[RequestId]: 5CAD96AD24C3973C78D6D6AC
+[HostId]: test-bucket2019.oss-cn-beijing.aliyuncs.com
+[ResponseError]:
+<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>SignatureDoesNotMatch</Code>
+  <Message>The request signature we calculated does not match the signature you provided. Check your key and signing method.</Message>
+  <RequestId>5CAD96AD24C3973C78D6D6AC</RequestId>
+  <HostId>test-bucket2019.oss-cn-beijing.aliyuncs.com</HostId>
+  <OSSAccessKeyId>LTAIvqwrlLQZtC4T</OSSAccessKeyId>
+  <SignatureProvided>MZIdRPVG8425Fs6a+L8QCxG5qSM=</SignatureProvided>
+  <StringToSign>GET
+
+
+Wed, 10 Apr 2019 07:09:33 GMT
+/test-bucket2019/?bucketInfo</StringToSign>
+  <StringToSignBytes>47 45 54 0A 0A 0A 57 65 64 2C 20 31 30 20 41 70 72 20 32 30 31 39 20 30 37 3A 30 39 3A 33 33 20 47 4D 54 0A 2F 74 65 73 74 2D 62 75 63 6B 65 74 32 30 31 39 2F 3F 62 75 63 6B 65 74 49 6E 66 6F </StringToSignBytes>
+</Error>
+
+2019-04-10 15:09:33,579 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:13:59,211 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:14:01,594 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:15:18,425 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:15:19,663 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:18:52,158 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:18:53,191 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:19:59,276 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:20:00,217 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:22:39,328 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:22:40,299 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:23:15,026 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:23:15,994 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:23:26,163 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:23:27,629 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:24:15,379 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:24:19,066 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:25:53,083 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:25:55,037 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:26:20,862 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:26:22,573 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:33:38,495 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:33:40,850 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:34:58,175 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:35:00,770 INFO com.aliyun.oss.demo.HelloOSS: Completed
+2019-04-10 15:36:27,883 INFO com.aliyun.oss.demo.HelloOSS: Started
+2019-04-10 15:36:29,788 INFO com.aliyun.oss.demo.HelloOSS: Completed

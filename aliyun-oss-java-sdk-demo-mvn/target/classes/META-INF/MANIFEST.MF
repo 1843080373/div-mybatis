@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Built-By: huangjian
+Class-Path: lib/log4j-1.2.5.jar lib/aliyun-sdk-oss-2.8.3.jar lib/httpc
+ lient-4.4.1.jar lib/httpcore-4.4.1.jar lib/commons-logging-1.2.jar li
+ b/commons-codec-1.9.jar lib/jdom-1.1.jar
+Build-Jdk: 1.8.0_131
+Created-By: Maven Integration for Eclipse
+Main-Class: com.aliyun.oss.demo.HelloOSS
+
